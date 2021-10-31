@@ -9,6 +9,7 @@ import { City } from './city';
   styleUrls: ['./cities.component.css']
 })
 export class CitiesComponent implements OnInit {
+  public displayedColumns: string[] = ['id', 'name', 'lat', 'lon'];
   public cities: City[];
 
   constructor(

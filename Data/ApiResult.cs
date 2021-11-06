@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Dynamic.Core;
+using System.Reflection;
 
 namespace WorldCities.Data
 {
@@ -56,6 +58,16 @@ namespace WorldCities.Data
                 return ((PageIndex + 1) < TotalPages);
             }
         }
+
+        // <summary>
+        // Sorting Column name (or null if none set)
+        // </summary>
+        public string SortColumn { get; set; }
+
+        // <summary>
+        // Sorting Order ("ASC", "DESC" or null if none set)
+        // </summary>
+        public string SortOrder { get; set; }
         #endregion
 
         #region Methods
@@ -65,6 +77,8 @@ namespace WorldCities.Data
         /// <param name="source">An IQueryable source of generic type</param>
         /// <param name="pageIndex">Zero-based current page index (0 = first page)</param>
         /// <param name="pageSize">The actual size of each page</param>
+        /// <param name="sortColumn">The sorting column name</param>
+        /// <param name="sortOrder">The sorting order ("ASC" or "DESC")</param>
         /// <returns>
         /// An object containing the paged result
         /// and all the relevant paging navigation info.
@@ -72,15 +86,45 @@ namespace WorldCities.Data
         public static async Task<ApiResult<T>> CreateAsync(
             IQueryable<T> source,
             int pageIndex,
-            int pageSize
+            int pageSize,
+            string sortColumn = null,
+            string sortOrder = null
             )
         {
             var count = await source.CountAsync();
+
+            if (!string.IsNullOrEmpty(sortColumn) && IsValidProperty(sortColumn))
+            {
+                sortOrder = !string.IsNullOrEmpty(sortOrder) && sortOrder.ToUpper() == "ASC" ? "ASC" : "DESC";
+                source = source.OrderBy(string.Format("{0} {1}", sortColumn, sortOrder));
+            }
+
             source = source.Skip(pageIndex * pageSize).Take(pageSize);
 
             var data = await source.ToListAsync();
 
-            return new ApiResult<T>(data, count, pageIndex, pageSize);
+            return new ApiResult<T>(data, count, pageIndex, pageSize, sortColumn, sortOrder);
+        }
+
+        #endregion
+
+        #region Methods
+        /// <summary>
+        /// Checks if the given property name exists
+        /// to protect against SQL injection attacks
+        /// </summary>
+        public static bool IsValidProperty(string propertyName, bool throwExceptionIfNotFound = true)
+        {
+            var prop = typeof(T).GetProperty(
+                propertyName,
+                BindingFlags.IgnoreCase|
+                BindingFlags.Public|
+                BindingFlags.Instance);
+            if (prop == null && throwExceptionIfNotFound)
+                throw new NotSupportedException(
+                    string.Format(
+                        "ERROR: Property '{0}' does not exist.", propertyName));
+            return prop != null;
         }
         #endregion
 
@@ -91,7 +135,9 @@ namespace WorldCities.Data
             List<T> data,
             int count,
             int pageIndex,
-            int pageSize
+            int pageSize,
+            string sortColumn,
+            string sortOrder
             )
         {
             Data = data;
@@ -99,6 +145,8 @@ namespace WorldCities.Data
             PageSize = pageSize;
             TotalCount = count;
             TotalPages = (int)Math.Ceiling(count / (double)pageSize);
+            SortColumn = sortColumn;
+            SortOrder = sortOrder;
         }
     }
 }

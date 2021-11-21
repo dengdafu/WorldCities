@@ -5,6 +5,8 @@ import { MatSort } from '@angular/material/sort';
 import { Country } from './country';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { error } from '@angular/compiler/src/util';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-countries',
@@ -25,10 +27,20 @@ export class CountriesComponent implements OnInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
+  filterTextChanged: Subject<string> = new Subject<string>();
+
   constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string) { }
 
   ngOnInit(): void {
     this.loadData(null);
+  }
+
+  // debounce filter text changes
+  onFilterTextChanged(filterText: string) {
+    if (this.filterTextChanged.observers.length === 0) {
+      this.filterTextChanged.pipe(debounceTime(1000), distinctUntilChanged()).subscribe(query => { this.loadData(query) });
+    }
+    this.filterTextChanged.next(filterText);
   }
 
   loadData(query: string = null) {

@@ -4,14 +4,15 @@ import { AbstractControl, AsyncValidatorFn, FormBuilder, FormGroup, Validators }
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { count, map } from 'rxjs/operators';
-import { Country } from './Country';
+import { BaseFormComponent } from '../base.form.component';
+import { Country } from './country';
 
 @Component({
   selector: 'app-country-edit',
   templateUrl: './country-edit.component.html',
   styleUrls: ['./country-edit.component.css']
 })
-export class CountryEditComponent implements OnInit {
+export class CountryEditComponent extends BaseFormComponent implements OnInit {
 
   // the view title
   title: string;
@@ -34,7 +35,7 @@ export class CountryEditComponent implements OnInit {
     private http: HttpClient,
     @Inject('BASE_URL') private baseUrl: string
   ) {
-    this.loadData();
+    super();
   }
 
   ngOnInit(): void {
@@ -42,7 +43,9 @@ export class CountryEditComponent implements OnInit {
       name: ['', Validators.required, this.isDupeField("name")],
       iso2: ['', [Validators.required, Validators.pattern(/^[a-zA-Z]{2}$/)], this.isDupeField("iso2")],
       iso3: ['', [Validators.required, Validators.pattern(/^[a-zA-Z]{3}$/)], this.isDupeField("iso3")],
-    })
+    });
+
+    this.loadData();
   }
 
   loadData() {

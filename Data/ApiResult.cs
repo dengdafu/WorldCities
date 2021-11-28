@@ -120,6 +120,10 @@ namespace WorldCities.Data
 
             source = source.Skip(pageIndex * pageSize).Take(pageSize);
 
+            // retrieve the SQL query (for debug purposes)
+#if DEBUG
+            var sql = source.ToParametrizedSql();
+#endif
             var data = await source.ToListAsync();
 
             return new ApiResult<T>(data, count, pageIndex, pageSize, sortColumn, sortOrder, filterColumn, filterQuery);

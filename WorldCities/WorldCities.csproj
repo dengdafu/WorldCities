@@ -73,6 +73,7 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
+    <Folder Include="Data\Migrations\" />
     <Folder Include="wwwroot\img\" />
     <Folder Include="Data\Models\" />
     <Folder Include="Data\Source\" />
@@ -97,7 +98,7 @@
     <ItemGroup>
       <DistFiles Include="$(SpaRoot)dist\**; $(SpaRoot)dist-server\**" />
       <DistFiles Include="$(SpaRoot)node_modules\**" Condition="'$(BuildServerSideRenderer)' == 'true'" />
-      <ResolvedFileToPublish Include="@(DistFiles-&gt;'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+      <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
         <RelativePath>%(DistFiles.Identity)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>

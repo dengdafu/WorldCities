@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using WorldCities.Data;
 using WorldCities.Data.Models;
+using WorldCities.Services;
 
 namespace WorldCities
 {
@@ -57,6 +59,15 @@ namespace WorldCities
                 .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
 
             services.AddAuthentication().AddIdentityServerJwt();
+
+            // IEmailSender implementation using SendGrid
+            services.AddTransient<IEmailSender, SendGridEmailSender>();
+            services.Configure<SendGridEmailSenderOptions>(options =>
+            {
+                options.ApiKey = Configuration["ExternalProviders:SendGrid:ApiKey"];
+                options.Sender_Email = Configuration["ExternalProviders:SendGrid:Sender_Email"];
+                options.Sender_Name = Configuration["ExternalProviders:SendGrid:Sender_Name"];
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

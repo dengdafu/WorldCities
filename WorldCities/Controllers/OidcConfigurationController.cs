@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace AuthSample.Controllers
+namespace WorldCities.Controllers
 {
     public class OidcConfigurationController : Controller
     {

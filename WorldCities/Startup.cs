@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -67,6 +68,18 @@ namespace WorldCities
                 options.ApiKey = Configuration["ExternalProviders:SendGrid:ApiKey"];
                 options.Sender_Email = Configuration["ExternalProviders:SendGrid:Sender_Email"];
                 options.Sender_Name = Configuration["ExternalProviders:SendGrid:Sender_Name"];
+            });
+
+            // IEmailSender implementation using MailKit
+            services.AddTransient<IEmailSender, MailKitEmailSender>();
+            services.Configure<MailKitEmailSenderOptions>(options =>
+            {
+                options.Host_Address = Configuration["ExternalProviders:MailKit:SMTP:Address"];
+                options.Host_Port = Convert.ToInt32(Configuration["ExternalProviders:MailKit:SMTP:Port"]);
+                options.Host_Username = Configuration["ExternalProviders:MailKit:SMTP:Account"];
+                options.Host_Password = Configuration["ExternalProviders:MailKit:SMTP:Password"];
+                options.Sender_EMail = Configuration["ExternalProviders:MailKit:SMTP:Sender_Email"];
+                options.Sender_Name = Configuration["ExternalProviders:MailKit:SMTP:Sender_Name"];
             });
         }
 
